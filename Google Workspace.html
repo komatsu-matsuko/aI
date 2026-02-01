@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>業務自動化ミッション</title>
+<script type="application/ld+json" id="ai-metadata">
+{ "@context": "http://schema.org", "@type": "HowTo", "name": "Google Account Creation & Announcement", "tool": ["Google Admin", "Chatwork/Slack"], "estimatedTime": "15M" }
+</script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+    :root { --primary: #FFE000; --primary-text: #111111; --accent-blue: #0063AF; --frame-color: #00508C; --success: #1e8e3e; --bg: #f8f9fa; --completed-bg: #C6E7FA; --surface: #ffffff; --border: #dadce0; }
+    body { font-family: 'Google Sans', Roboto, Arial, sans-serif; background-color: var(--bg); color: #202124; line-height: 1.6; margin: 0; padding: 40px 20px 160px 20px; transition: background-color 1.5s ease; }
+    body.completed { background-color: var(--completed-bg) !important; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    /* Header & Diagram & KeyBox */
+    header { text-align: center; background: white; padding: 50px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 40px; border-top: 10px solid var(--primary); overflow: hidden; }
+    .mission-label { background: var(--primary); color: var(--primary-text); display: inline-block; padding: 5px 15px; border-radius: 99px; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 15px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    h1 { margin: 0; color: #111; font-size: 32px; letter-spacing: 0.05em; line-height: 1.3; font-weight: 900; }
+    .title-sub { font-size: 16px; color: #5f6368; display: block; margin-top: 10px; font-weight: normal; }
+    .diagram-wrapper { background: white; padding: 30px 20px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .diagram-title { text-align: center; font-weight: 900; color: var(--accent-blue); margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .key-box { background: #fff; border: 2px solid var(--primary); border-radius: 12px; padding: 25px; margin-bottom: 40px; box-shadow: 0 4px 0 rgba(0,0,0,0.05); }
+    .key-title { font-weight: 900; font-size: 18px; color: #111; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+    .key-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    .key-item { background: #f8f9fa; border: 1px solid #ccc; padding: 10px 15px; border-radius: 8px; font-size: 13px; font-family: monospace; display: flex; align-items: center; gap: 8px; color: #111; font-weight: bold; }
+    .key-item .material-icons { color: var(--frame-color); }
+
+    /* Content & Steps */
+    .section { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    h2 { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-top: 0; color: #3c4043; }
+    .step-badge { background: var(--primary); color: var(--primary-text); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    
+    /* Interactive Elements & Tooltip */
+    .ui-mockup { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 0; margin: 20px 0; font-family: Arial, sans-serif; font-size: 13px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .ui-header { background: #f1f3f4; padding: 8px 15px; border-bottom: 1px solid #ccc; color: #5f6368; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+    .ui-body { padding: 15px; }
+    
+    .term { border-bottom: 2px dotted #0063AF; cursor: help; position: relative; color: #0063AF; font-weight: bold; transition: all 0.2s; }
+    .term:hover { background: #e8f0fe; }
+    .term:hover::after { content: attr(data-tooltip); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: #202124; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 12px; white-space: nowrap; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); line-height: 1.4; }
+    .term:hover::before { content: ""; position: absolute; bottom: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #202124 transparent transparent transparent; z-index: 1000; }
+
+    /* Code & Copy */
+    .code-wrapper { position: relative; margin-top: 15px; }
+    .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.4); padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; z-index: 10; }
+    .copy-btn:hover { background: rgba(255,255,255,0.25); }
+    .copy-btn.copied { background: var(--success); border-color: var(--success); }
+    .code-block { background: #282c34; color: #abb2bf; padding: 40px 20px 20px 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; }
+
+    /* Task & Progress */
+    .task-item { display: flex; align-items: center; gap: 15px; padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-top: 10px; cursor: pointer; transition: background 0.2s; background: #fff; }
+    .task-item:hover { background: #f0f7ff; }
+    .task-checkbox { width: 22px; height: 22px; border: 2px solid var(--success); border-radius: 6px; background: white; display: flex; align-items: center; justify-content: center; color: var(--success); font-weight: bold; font-size: 16px; transition: all 0.2s; }
+    .task-item.checked { background: #e6f4ea; border-color: var(--success); }
+    .task-item.checked .task-checkbox { background: var(--success); color: white; }
+    .task-item.checked .task-checkbox::after { content: "✔"; }
+
+    /* Footer & Admin */
+    .footer-actions { text-align: center; margin-top: 80px; padding-top: 30px; border-top: 1px dashed #ddd; }
+    .fix-btn { background: #f8f9fa; border: 1px solid #ddd; color: #5f6368; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .fix-btn:hover { background: #333; color: white; border-color: #333; }
+    
+    .progress-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 800px; height: 60px; z-index: 1000; display: flex; align-items: center; pointer-events: none; }
+    .progress-frame { width: 100%; height: 24px; background: var(--frame-color); border-radius: 999px; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
+    .progress-bar { width: 0%; height: 100%; background: var(--primary); border-radius: 999px; transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; }
+    .progress-char { position: absolute; right: -25px; top: -38px; width: 50px; height: 50px; transition: right 0.5s ease; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+    .progress-char img { width: 100%; height: 100%; object-fit: contain; }
+    .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 9999; pointer-events: none; }
+    @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="mission-label">MISSION</span>
+        <h1>Google Workspace 導入＆アカウント作成<br><span class="title-sub">AI時代の「デジタル基盤」を構築せよ！</span></h1>
+    </header>
+
+    <div class="diagram-wrapper">
+        <div class="diagram-title">
+            <span class="material-icons">help_outline</span> なぜGoogleアカウントが必要？
+        </div>
+        <p style="text-align:center; font-weight:bold; color:#333; margin-bottom:20px;">
+            単なるメールアドレスではありません。<br>これは「AIと一緒に働くためのパスポート」です。
+        </p>
+        
+        <div style="background:#fff3e0; border-left:5px solid #ffb74d; padding:15px; margin-bottom:10px; border-radius:4px;">
+            <strong style="color:#e65100; font-size:18px;">👑 1位：AI (<span class="term" data-tooltip="Googleが開発した高性能な生成AI">Gemini</span>) と直結する</strong>
+            <p style="margin:5px 0 0 0; font-size:13px;">Sheets / Gmail / Drive のデータがそのままAIの入力になります。「AIが自然に使われる会社」への第一歩です。</p>
+        </div>
+        <div style="background:#e3f2fd; border-left:5px solid #2196f3; padding:15px; margin-bottom:10px; border-radius:4px;">
+            <strong style="color:#0d47a1; font-size:16px;">🥈 2位：スプレッドシートを会社の<span class="term" data-tooltip="データを整理して蓄積・管理する場所">DB</span>にできる</strong>
+            <p style="margin:5px 0 0 0; font-size:13px;">現場入力 → 集計（<span class="term" data-tooltip="Business Intelligence：データを分析して可視化すること">BI</span>）→ 判断（AI）の流れが最短で組めます。</p>
+        </div>
+        <div style="background:#f3e5f5; border-left:5px solid #9c27b0; padding:15px; margin-bottom:10px; border-radius:4px;">
+            <strong style="color:#4a148c; font-size:16px;">🥉 3位：<span class="term" data-tooltip="Application Programming Interface：ソフト同士をつなぐ接続口">API</span>連携が圧倒的に楽</strong>
+            <p style="margin:5px 0 0 0; font-size:13px;">Googleアカウント＝認証基盤。自動化やAI開発をする際の「摩擦」がほぼゼロになります。</p>
+        </div>
+    </div>
+
+    <div class="key-box">
+        <div class="key-title">
+            <span class="material-icons">vpn_key</span> 管理者からの支給品 (必要なもの)
+        </div>
+        <div class="key-list">
+            <div class="key-item" data-ai-type="credential-key"><span class="material-icons">email</span> スタッフの会社メールアドレス</div>
+            <div class="key-item" data-ai-type="credential-key"><span class="material-icons">smartphone</span> 電話番号 (SMS認証用)</div>
+            <div class="key-item" data-ai-type="credential-key"><span class="material-icons">admin_panel_settings</span> 管理コンソールのURL</div>
+        </div>
+    </div>
+
+    <div class="section" data-ai-type="step">
+        <h2><span class="step-badge">1</span> ユーザー追加画面を開く</h2>
+        <p>Google管理コンソール（Google Admin）にログインし、ユーザー一覧画面へ移動します。</p>
+
+        <div class="ui-mockup" data-ai-type="ui-simulation">
+            <div class="ui-header">
+                <span class="material-icons" style="font-size:14px;">admin_panel_settings</span> Google Admin > ユーザー
+            </div>
+            <div class="ui-body" style="background:#f8f9fa;">
+                <div style="background:white; border:1px solid #dadce0; border-radius:4px; padding:15px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px;">
+                        <span style="font-size:16px; color:#202124;">ユーザー | すべてのユーザーを表示中</span>
+                        <div>
+                            <span style="color:#1a73e8; font-weight:bold; font-size:13px; margin-right:15px; cursor:pointer;">新しいユーザーの追加 👈</span>
+                            <span style="color:#1a73e8; font-size:13px; cursor:pointer;">ユーザーの一括更新</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:15px;">
+                        <div style="display:inline-flex; align-items:center; border:1px dashed #ccc; border-radius:20px; padding:5px 15px; color:#5f6368; font-size:13px;">
+                            <span class="material-icons" style="font-size:16px; margin-right:5px;">add</span> フィルタを追加
+                        </div>
+                    </div>
+                    <div style="margin-top:20px; color:#5f6368; font-size:12px; display:flex; gap:200px;">
+                        <div style="display:flex; align-items:center; gap:10px;"><div style="width:16px; height:16px; border:1px solid #5f6368; border-radius:2px;"></div> 名前 <span class="material-icons" style="font-size:14px;">arrow_upward</span></div>
+                        <div>メール</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p>👉 画面右上の青い文字<strong>「新しいユーザーの追加」</strong>をクリックしてください。</p>
+
+        <div class="task-item" onclick="toggleTask(this)" data-ai-type="task">
+            <div class="task-checkbox"></div><div>「新しいユーザーの追加」をクリックした！</div>
+        </div>
+    </div>
+
+    <div class="section" data-ai-type="step">
+        <h2><span class="step-badge">2</span> ユーザー情報の入力</h2>
+        <p>スタッフの氏名とメールアドレスを入力します。</p>
+
+        <div class="ui-mockup" data-ai-type="ui-simulation">
+            <div class="ui-header">
+                <span class="material-icons" style="font-size:14px;">person_add</span> 新しいユーザーの追加
+            </div>
+            <div class="ui-body" style="background:#fff; padding:30px;">
+                <div style="font-size:18px; color:#202124; margin-bottom:20px;">ユーザー情報</div>
+                
+                <div style="display:flex; gap:30px; margin-bottom:20px;">
+                    <div style="flex:1;">
+                        <label style="display:block; color:#1a73e8; font-size:12px; margin-bottom:5px;">姓 *</label>
+                        <input type="text" value="油谷" style="width:100%; border:none; border-bottom:2px solid #1a73e8; padding:5px 0; font-size:14px;">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block; color:#5f6368; font-size:12px; margin-bottom:5px;">名 *</label>
+                        <input type="text" value="太郎" style="width:100%; border:none; border-bottom:1px solid #ccc; padding:5px 0; font-size:14px;">
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-bottom:5px; align-items:flex-end;">
+                    <div style="flex:1;">
+                        <label style="display:block; color:#5f6368; font-size:12px; margin-bottom:5px;">メインのメールアドレス *</label>
+                        <input type="text" value="yutani" style="width:100%; border:none; border-bottom:1px solid #ccc; padding:5px 0; font-size:14px;">
+                    </div>
+                    <div style="padding-bottom:5px; font-size:14px; color:#5f6368;">@ bremen.band</div>
+                </div>
+                <div style="font-size:11px; color:#5f6368; margin-bottom:20px;">ログインにはこのメールアドレスを使用することになります</div>
+
+                <div style="margin-bottom:30px;">
+                    <label style="display:block; color:#5f6368; font-size:12px; margin-bottom:5px;">予備のメールアドレス</label>
+                    <input type="text" style="width:100%; border:none; border-bottom:1px solid #ccc; padding:5px 0; font-size:14px;">
+                    <div style="font-size:11px; color:#5f6368; margin-top:5px;">このメールアドレス（個人のメールアドレスなど）に最初のログイン手順を送信します</div>
+                </div>
+
+                <div style="color:#1a73e8; font-size:13px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    ユーザーのパスワード、組織部門、プロフィール写真を管理する <span class="material-icons" style="font-size:16px;">keyboard_arrow_down</span>
+                </div>
+                
+                <div style="margin-top:30px; border-top:1px solid #eee; padding-top:20px; display:flex; align-items:center; gap:10px; color:#202124;">
+                    <span class="material-icons" style="color:#5f6368;">verified_user</span>
+                    <span style="font-size:12px;">このユーザーには Google Workspace Business Standard ライセンスが割り当てられます (ユーザー あたり月額 ¥1,900 JPY)</span>
+                </div>
+
+                <div style="text-align:right; margin-top:20px;">
+                    <button style="background:#f1f3f4; color:black; border:none; padding:10px 20px; border-radius:4px; font-weight:bold; margin-right:10px;">キャンセル</button>
+                    <button style="background:#f1f3f4; color:#aaa; border:none; padding:10px 20px; border-radius:4px; font-weight:bold;">新しいユーザーの追加 👈</button>
+                </div>
+            </div>
+        </div>
+
+        <p>👉 入力が完了したら、右下のボタンを押してください。<br>
+        ※パスワードは自動生成されます。次の画面で表示されるパスワードをコピーしてください。</p>
+
+        <div class="task-item" onclick="toggleTask(this)" data-ai-type="task">
+            <div class="task-checkbox"></div><div>ユーザー情報を入力して追加した！</div>
+        </div>
+        <div class="task-item" onclick="toggleTask(this)" data-ai-type="task">
+            <div class="task-checkbox"></div><div>生成されたパスワードをコピーした！</div>
+        </div>
+    </div>
+
+    <div class="section" data-ai-type="step">
+        <h2><span class="step-badge">3</span> 社員への通達（コピペで完了）</h2>
+        <p>アカウントを作ったら、その「理由」と「ログイン情報」を本人に送信します。<br>
+        以下の文章をコピーして、チャットワークやSlack、LINEグループに流してください。</p>
+
+        <div class="code-wrapper">
+            <button class="copy-btn" onclick="copyCode(this)">
+                <span class="material-icons" style="font-size:14px;">content_copy</span> 本文をコピー
+            </button>
+            <div class="code-block" style="white-space: pre-wrap; font-family: sans-serif; line-height: 1.6; color:#e0e0e0; font-size:13px;">【重要】AI時代の新しい働き方へ。Googleアカウント発行のお知らせ
+
+お疲れ様です。
+今後、当社の業務効率化とAI活用を加速させるため、全社員に「会社用Googleアカウント（Workspace）」を発行しました。
+
+▼ なぜGoogleなのか？（3つの理由）
+
+🥇 1. AI (Gemini) と直結する
+Sheets／Gmail／DriveのデータがそのままAIの入力になります。
+「AIが自然に使われる会社」への第一歩です。
+
+🥈 2. データ活用を高速化
+Googleスプレッドシートを会社のDBとして活用します。
+「現場入力 → 自動集計(BI) → AI判断」の流れを最短で構築します。
+
+🥉 3. 開発の摩擦をなくす
+Googleアカウントを認証基盤とすることで、自動化ツールやAPI連携が圧倒的にスムーズになります。
+
+🚀 【予告】新・顧客管理ツールについて
+現在、新たな顧客管理ツールを開発中です。
+4月までに順次機能を解放し、ご案内する予定です。このツールを利用するためにもGoogleアカウントが必須となります。
+
+▼ お願い
+個別にログイン情報（メールアドレスと初期パスワード）を送りますので、まずは「ログイン」を行い、使用できる状態にしてください。
+
+内容を確認し、ログインできた方はこの投稿に ✅ リアクションをお願いします！</div>
+        </div>
+
+        <div class="ui-mockup" data-ai-type="ui-simulation">
+            <div class="ui-header" style="background:#4A154B; color:white;">
+                <span class="material-icons" style="font-size:14px;">chat</span> Slack / Chatwork イメージ
+            </div>
+            <div class="ui-body">
+                <div style="display:flex; gap:10px;">
+                    <div style="width:36px; height:36px; background:#ccc; border-radius:4px;"></div>
+                    <div>
+                        <div style="font-weight:bold; font-size:13px;">管理者 <span style="font-weight:normal; color:#666; font-size:11px;">10:00</span></div>
+                        <div style="font-size:13px; margin-top:5px;">【重要】AI時代の新しい働き方へ。Googleアカウント発行のお知らせ...</div>
+                        <div style="margin-top:10px; display:inline-flex; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:12px; padding:2px 8px; align-items:center; gap:5px; font-size:12px; color:#2e7d32;">
+                            <span>✅</span> <span>12</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-item" onclick="toggleTask(this)" data-ai-type="task"><div class="task-checkbox"></div><div>通達文をチャットに投稿した！</div></div>
+    </div>
+
+    <div class="section" data-ai-type="step">
+        <h2><span class="step-badge">4</span> スタッフの承認確認</h2>
+        <p>スタッフのリアクション（✅）が集まったら、管理画面でステータスが「有効」になっているか確認して完了です。</p>
+        <div class="task-item" onclick="toggleTask(this)" data-ai-type="task"><div class="task-checkbox"></div><div>全員のログインを確認した！🎉</div></div>
+    </div>
+
+    <div class="footer-actions">
+        <button class="fix-btn" onclick="copyHtmlForUpdate()">
+            <span class="material-icons" style="font-size:14px;">update</span> 管理者用：最新環境へアップデート
+        </button>
+        <p style="margin-top:5px; font-size:10px;">現在のコードと更新用プロンプトをコピーします。</p>
+    </div>
+</div>
+
+<div class="progress-container">
+  <div class="progress-frame">
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-char">
+        <img src="https://yutani8013f70550-cmqpt.wordpress.com/wp-content/uploads/2026/02/e3818ae38198e382ade383a3e38383e38388-e9a194e381a0e38191.png" alt="cat">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let totalTasks = 0; let completedTasks = 0;
+  function init() { totalTasks = document.querySelectorAll('.task-item').length; updateProgress(); }
+  function toggleTask(el) { if (el.classList.contains('checked')) { el.classList.remove('checked'); completedTasks--; } else { el.classList.add('checked'); completedTasks++; } updateProgress(); }
+  function updateProgress() { const pct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100); const bar = document.getElementById('progressBar'); bar.style.width = pct + '%'; if (pct === 100) celebrate(); }
+  function celebrate() { if (document.body.classList.contains('completed')) return; document.body.classList.add('completed'); createConfetti(); }
+  function copyCode(btn) { const code = btn.nextElementSibling.innerText; navigator.clipboard.writeText(code).then(() => { const originalText = btn.innerHTML; btn.innerHTML = '<span class="material-icons" style="font-size:14px;">check</span> 完了'; btn.classList.add('copied'); setTimeout(() => { btn.innerHTML = originalText; btn.classList.remove('copied'); }, 2000); }); }
+  function copyLibId(btn) { const id = btn.previousElementSibling.innerText; navigator.clipboard.writeText(id).then(() => { const originalText = btn.innerHTML; btn.innerHTML = '<span class="material-icons" style="font-size:14px;">check</span> コピー'; btn.style.background = '#1e8e3e'; setTimeout(() => { btn.innerHTML = originalText; btn.style.background = '#0063AF'; }, 2000); }); }
+  function copyHtmlForUpdate() { 
+      const html = document.documentElement.outerHTML; 
+      const prompt = "【修正依頼】\n以下のHTMLマニュアルを、最新のGoogle Workspace/GASの仕様に合わせて全手順を見直し、アップデートしてください。\nデザインや構成は絶対に変更せず、テキストやスクリプトの中身だけを最新化してください。\n\n--- HTML Code ---\n" + html;
+      navigator.clipboard.writeText(prompt).then(() => { alert("管理者用：更新プロンプトをコピーしました！\n\nGeminiに貼り付けて、最新化を実行してください。"); }); 
+  }
+  function createConfetti() { const colors = ['#FFE000', '#009DD5', '#E76112', '#FFFFFF']; for (let i = 0; i < 150; i++) { const conf = document.createElement('div'); conf.classList.add('confetti'); conf.style.left = Math.random() * 100 + 'vw'; conf.style.top = -10 + 'px'; conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; conf.style.animationDuration = (Math.random() * 3 + 2) + 's'; document.body.appendChild(conf); } }
+  window.onload = init;
+</script>
+</body>
+</html>
